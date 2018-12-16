@@ -43,6 +43,15 @@ class AqaraBodySensor(XiaomiCustomDevice):
             super().__init__(*args, **kwargs)
             self._timer_handle = None
 
+        @asyncio.coroutine
+        def bind(self):
+            return [True]
+
+        @asyncio.coroutine
+        def configure_reporting(self, attribute, min_interval, max_interval,
+                                reportable_change, manufacturer=None):
+            return [True]
+
         def _update_attribute(self, attrid, value):
             super()._update_attribute(attrid, value)
 
@@ -59,11 +68,23 @@ class AqaraBodySensor(XiaomiCustomDevice):
 
     class MotionCluster(LocalDataCluster, IasZone):
         cluster_id = IasZone.cluster_id
+        ZONE_TYPE = 0x0001
+        MOTION_TYPE = 0x000d
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self._timer_handle = None
             self.endpoint.device.motionBus.add_listener(self)
+            self._update_attribute(self.ZONE_TYPE, self.MOTION_TYPE)
+
+        @asyncio.coroutine
+        def bind(self):
+            return [True]
+
+        @asyncio.coroutine
+        def configure_reporting(self, attribute, min_interval, max_interval,
+                                reportable_change, manufacturer=None):
+            return [True]
 
         def motion_event(self):
             super().listener_event(
