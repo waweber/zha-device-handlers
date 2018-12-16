@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from zigpy.zcl.clusters.general import Basic, PowerConfiguration
@@ -122,6 +123,14 @@ class PowerConfigurationCluster(LocalDataCluster, PowerConfiguration):
         self._update_attribute(BATTERY_PERCENTAGE_REMAINING, voltage)
         self._update_attribute(BATTERY_VOLTAGE_MV, rawVoltage)
 
+    @asyncio.coroutine
+    def bind(self):
+        return [True]
+
+    @asyncio.coroutine
+    def configure_reporting(self, attribute, min_interval, max_interval,
+                            reportable_change, manufacturer=None):
+        return [True]
 
 class TemperatureMeasurementCluster(LocalDataCluster, TemperatureMeasurement):
     cluster_id = TemperatureMeasurement.cluster_id
@@ -135,3 +144,12 @@ class TemperatureMeasurementCluster(LocalDataCluster, TemperatureMeasurement):
             TEMPERATURE_MEASURED_VALUE,
             rawTemperature * 100
         )
+
+    @asyncio.coroutine
+    def bind(self):
+        return [True]
+
+    @asyncio.coroutine
+    def configure_reporting(self, attribute, min_interval, max_interval,
+                            reportable_change, manufacturer=None):
+        return [True]
