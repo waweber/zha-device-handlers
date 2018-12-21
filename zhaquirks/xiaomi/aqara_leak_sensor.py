@@ -5,6 +5,7 @@ from zigpy import quirks
 from zigpy.quirks.xiaomi import AqaraWaterSensor
 from zhaquirks.xiaomi import BasicCluster, PowerConfigurationCluster,\
     TemperatureMeasurementCluster, XiaomiCustomDevice
+from zhaquirks import LocalDataCluster
 
 #  remove the zigpy version of this device handler
 if AqaraWaterSensor in quirks._DEVICE_REGISTRY:
@@ -15,6 +16,15 @@ class AqaraLeakSensor(XiaomiCustomDevice):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    class MotionCluster(LocalDataCluster, IasZone):
+        cluster_id = IasZone.cluster_id
+        ZONE_TYPE = 0x0001
+        LEAK_TYPE = 0x002a
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self._update_attribute(self.ZONE_TYPE, self.LEAK_TYPE)
 
     signature = {
         #  <SimpleDescriptor endpoint=1 profile=260 device_type=1026
@@ -45,7 +55,7 @@ class AqaraLeakSensor(XiaomiCustomDevice):
                     Identify.cluster_id,
                     PowerConfigurationCluster,
                     TemperatureMeasurementCluster,
-                    IasZone.cluster_id
+                    MotionCluster
                 ],
             }
         },
