@@ -101,7 +101,19 @@ class BasicCluster(CustomCluster, Basic):
         return percent
 
 
-class PowerConfigurationCluster(LocalDataCluster, PowerConfiguration):
+class NoBindNoConfigureReporting():
+
+    @asyncio.coroutine
+    def bind(self):
+        return [True]
+
+    @asyncio.coroutine
+    def configure_reporting(self, attribute, min_interval, max_interval,
+                            reportable_change, manufacturer=None):
+        return [True]
+
+
+class PowerConfigurationCluster(NoBindNoConfigureReporting, LocalDataCluster, PowerConfiguration):
     cluster_id = PowerConfiguration.cluster_id
     BATTERY_VOLTAGE_ATTR = 0x0020
     BATTERY_SIZE_ATTR = 0x0031
@@ -123,16 +135,8 @@ class PowerConfigurationCluster(LocalDataCluster, PowerConfiguration):
         self._update_attribute(BATTERY_PERCENTAGE_REMAINING, voltage)
         self._update_attribute(BATTERY_VOLTAGE_MV, rawVoltage)
 
-    @asyncio.coroutine
-    def bind(self):
-        return [True]
 
-    @asyncio.coroutine
-    def configure_reporting(self, attribute, min_interval, max_interval,
-                            reportable_change, manufacturer=None):
-        return [True]
-
-class TemperatureMeasurementCluster(LocalDataCluster, TemperatureMeasurement):
+class TemperatureMeasurementCluster(NoBindNoConfigureReporting, LocalDataCluster, TemperatureMeasurement):
     cluster_id = TemperatureMeasurement.cluster_id
 
     def __init__(self, *args, **kwargs):
@@ -144,12 +148,3 @@ class TemperatureMeasurementCluster(LocalDataCluster, TemperatureMeasurement):
             TEMPERATURE_MEASURED_VALUE,
             rawTemperature * 100
         )
-
-    @asyncio.coroutine
-    def bind(self):
-        return [True]
-
-    @asyncio.coroutine
-    def configure_reporting(self, attribute, min_interval, max_interval,
-                            reportable_change, manufacturer=None):
-        return [True]

@@ -9,7 +9,7 @@ from zigpy.zcl.clusters.general import Basic, PowerConfiguration,\
 from zigpy.quirks import CustomDevice, CustomCluster
 from zigpy.profiles import zha
 from zhaquirks.xiaomi import BasicCluster, PowerConfigurationCluster,\
-    TemperatureMeasurementCluster, XiaomiCustomDevice
+    TemperatureMeasurementCluster, XiaomiCustomDevice, NoBindNoConfigureReporting
 from zhaquirks import Bus, LocalDataCluster
 
 import homeassistant.components.zha.const as zha_const
@@ -36,21 +36,12 @@ class AqaraBodySensor(XiaomiCustomDevice):
         self.motionBus = Bus()
         super().__init__(*args, **kwargs)
 
-    class OccupancyCluster(CustomCluster, OccupancySensing):
+    class OccupancyCluster(NoBindNoConfigureReporting, CustomCluster, OccupancySensing):
         cluster_id = OccupancySensing.cluster_id
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self._timer_handle = None
-
-        @asyncio.coroutine
-        def bind(self):
-            return [True]
-
-        @asyncio.coroutine
-        def configure_reporting(self, attribute, min_interval, max_interval,
-                                reportable_change, manufacturer=None):
-            return [True]
 
         def _update_attribute(self, attrid, value):
             super()._update_attribute(attrid, value)
@@ -66,7 +57,7 @@ class AqaraBodySensor(XiaomiCustomDevice):
             self._timer_handle = None
             self._update_attribute(OCCUPANCY_STATE, OFF)
 
-    class MotionCluster(LocalDataCluster, IasZone):
+    class MotionCluster(NoBindNoConfigureReporting, LocalDataCluster, IasZone):
         cluster_id = IasZone.cluster_id
         ZONE_TYPE = 0x0001
         MOTION_TYPE = 0x000d
@@ -76,15 +67,6 @@ class AqaraBodySensor(XiaomiCustomDevice):
             self._timer_handle = None
             self.endpoint.device.motionBus.add_listener(self)
             self._update_attribute(self.ZONE_TYPE, self.MOTION_TYPE)
-
-        @asyncio.coroutine
-        def bind(self):
-            return [True]
-
-        @asyncio.coroutine
-        def configure_reporting(self, attribute, min_interval, max_interval,
-                                reportable_change, manufacturer=None):
-            return [True]
 
         def motion_event(self):
             super().listener_event(

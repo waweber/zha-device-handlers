@@ -9,7 +9,7 @@ from zigpy.zcl.clusters.general import Basic, Groups, PowerConfiguration,\
 from zigpy.zcl.clusters.closures import DoorLock
 from zigpy.zcl.clusters.security import IasZone
 from zhaquirks.xiaomi import BasicCluster, PowerConfigurationCluster,\
-    TemperatureMeasurementCluster, XiaomiCustomDevice
+    TemperatureMeasurementCluster, XiaomiCustomDevice, NoBindNoConfigureReporting
 from zhaquirks import Bus, LocalDataCluster
 
 VIBE_DEVICE_TYPE = 0x5F02  # decimal = 24322
@@ -114,7 +114,7 @@ class AqaraVibrationSensor(XiaomiCustomDevice):
                     'motion_event'
                 )
 
-    class MotionCluster(LocalDataCluster, IasZone):
+    class MotionCluster(NoBindNoConfigureReporting, LocalDataCluster, IasZone):
         cluster_id = IasZone.cluster_id
         ZONE_STATE = 0x0000
         ZONE_TYPE = 0x0001
