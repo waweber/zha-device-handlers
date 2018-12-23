@@ -10,7 +10,7 @@ from zigpy.quirks import CustomDevice
 DIAGNOSTICS_CLUSTER_ID = 0x0B05  # decimal = 2821
 
 
-class CentraLite3130(CustomDevice):
+class DimmerSwitch(CustomDevice):
 
     class EventableOnOffCluster(EventableCluster, OnOff):
         cluster_id = OnOff.cluster_id
@@ -55,8 +55,6 @@ class CentraLite3130(CustomDevice):
     replacement = {
         'endpoints': {
             1: {
-                'manufacturer': 'CentraLite',
-                'model': '3130',
                 'input_clusters': [
                     Basic.cluster_id,
                     PowerConfigurationCluster,
