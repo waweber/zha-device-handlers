@@ -46,7 +46,24 @@ class XiaomiCustomDevice(CustomDevice):
         super().__init__(*args, **kwargs)
 
 
-class BasicCluster(CustomCluster, Basic):
+class NoBindNoReportCluster(CustomCluster):
+    """Cluster meant to prevent bind and configure reporting calls."""
+
+    def bind(self):
+        """Bind cluster."""
+        pass
+
+    def unbind(self):
+        """Unbind cluster."""
+        pass
+
+    def configure_reporting(self, attribute, min_interval, max_interval,
+                            reportable_change, manufacturer=None):
+        """Configure reporting for cluster."""
+        pass
+
+
+class BasicCluster(NoBindNoReportCluster, Basic):
     """Xiaomi basic cluster implementation."""
 
     cluster_id = Basic.cluster_id
@@ -172,7 +189,8 @@ class BasicCluster(CustomCluster, Basic):
         return min(200, percent)
 
 
-class PowerConfigurationCluster(LocalDataCluster, PowerConfiguration):
+class PowerConfigurationCluster(
+        NoBindNoReportCluster, LocalDataCluster, PowerConfiguration):
     """Xiaomi power configuration cluster implementation."""
 
     cluster_id = PowerConfiguration.cluster_id
@@ -200,7 +218,7 @@ class PowerConfigurationCluster(LocalDataCluster, PowerConfiguration):
                                int(raw_voltage / 100))
 
 
-class OccupancyCluster(CustomCluster, OccupancySensing):
+class OccupancyCluster(NoBindNoReportCluster, OccupancySensing):
     """Occupancy cluster."""
 
     cluster_id = OccupancySensing.cluster_id
@@ -225,7 +243,7 @@ class OccupancyCluster(CustomCluster, OccupancySensing):
         self._update_attribute(OCCUPANCY_STATE, OFF)
 
 
-class MotionCluster(LocalDataCluster, IasZone):
+class MotionCluster(NoBindNoReportCluster, IasZone):
     """Motion cluster."""
 
     cluster_id = IasZone.cluster_id

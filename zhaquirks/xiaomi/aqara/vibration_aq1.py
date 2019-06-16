@@ -3,7 +3,6 @@ import asyncio
 import logging
 
 from zigpy.profiles import zha
-from zigpy.quirks import CustomCluster
 import zigpy.types as types
 from zigpy.zcl.clusters.closures import DoorLock
 from zigpy.zcl.clusters.general import (
@@ -14,6 +13,7 @@ from zhaquirks import Bus, LocalDataCluster
 from zhaquirks.xiaomi import (
     BasicCluster, PowerConfigurationCluster, XiaomiCustomDevice
 )
+from .. import NoBindNoReportCluster
 
 VIBE_DEVICE_TYPE = 0x5F02  # decimal = 24322
 RECENT_ACTIVITY_LEVEL_ATTR = 0x0505  # decimal = 1285
@@ -42,6 +42,21 @@ class VibrationAQ1(XiaomiCustomDevice):
         self.motion_bus = Bus()
         super().__init__(*args, **kwargs)
 
+    class IdentifyCluster(NoBindNoReportCluster, Identify):
+        """Identify cluster."""
+
+    class GroupsCluster(NoBindNoReportCluster, Groups):
+        """Groups cluster."""
+
+    class ScenesCluster(NoBindNoReportCluster, Scenes):
+        """Scenes cluster."""
+
+    class OtaCluster(NoBindNoReportCluster, Ota):
+        """Ota cluster."""
+
+    class DoorLockCluster(NoBindNoReportCluster, DoorLock):
+        """DoorLock cluster."""
+
     class VibrationBasicCluster(BasicCluster):
         """Vibration cluster."""
 
@@ -54,7 +69,7 @@ class VibrationAQ1(XiaomiCustomDevice):
                 0xFF0D: ('sensitivity', types.uint8_t),
             })
 
-    class MultistateInputCluster(CustomCluster, MultistateInput):
+    class MultistateInputCluster(NoBindNoReportCluster, MultistateInput):
         """Multistate input cluster."""
 
         cluster_id = DoorLock.cluster_id
@@ -102,7 +117,7 @@ class VibrationAQ1(XiaomiCustomDevice):
                 self._current_state[STATUS_TYPE_ATTR]
             )
 
-    class MotionCluster(LocalDataCluster, IasZone):
+    class MotionCluster(NoBindNoReportCluster, LocalDataCluster, IasZone):
         """Motion cluster."""
 
         cluster_id = IasZone.cluster_id
@@ -204,18 +219,18 @@ class VibrationAQ1(XiaomiCustomDevice):
                 'input_clusters': [
                     VibrationBasicCluster,
                     PowerConfigurationCluster,
-                    Identify.cluster_id,
+                    IdentifyCluster,
                     MotionCluster,
-                    Ota.cluster_id,
+                    OtaCluster,
                     MultistateInputCluster
                 ],
                 'output_clusters': [
                     VibrationBasicCluster,
-                    Identify.cluster_id,
-                    Groups.cluster_id,
-                    Scenes.cluster_id,
-                    Ota.cluster_id,
-                    DoorLock.cluster_id
+                    IdentifyCluster,
+                    GroupsCluster,
+                    ScenesCluster,
+                    OtaCluster,
+                    DoorLockCluster
                 ],
             },
             2: {
@@ -223,13 +238,13 @@ class VibrationAQ1(XiaomiCustomDevice):
                 'model': 'lumi.vibration.aq1',
                 'device_type': VIBE_DEVICE_TYPE,
                 'input_clusters': [
-                    Identify.cluster_id
+                    IdentifyCluster
                 ],
                 'output_clusters': [
-                    Identify.cluster_id,
-                    Groups.cluster_id,
-                    Scenes.cluster_id,
-                    MultistateInput.cluster_id
+                    IdentifyCluster,
+                    GroupsCluster,
+                    ScenesCluster,
+                    MultistateInputCluster
                 ],
             }
         },
