@@ -1,6 +1,7 @@
 """Netvox device."""
+import zigpy.types as t
 from zigpy.profiles import zha
-from zigpy.quirks import CustomDevice
+from zigpy.quirks import CustomDevice, CustomCluster
 from zigpy.zcl.clusters.general import (
     Basic, Commissioning, Identify, PollControl)
 from zigpy.zcl.clusters.security import IasZone
@@ -8,6 +9,21 @@ from zigpy.zcl.clusters.security import IasZone
 from zhaquirks.centralite import PowerConfigurationCluster
 
 DIAGNOSTICS_CLUSTER_ID = 0x0B05  # decimal = 2821
+
+
+class IASZoneCluster(CustomCluster, IasZone):
+    """Centralite acceleration cluster."""
+
+    def __init__(self, *args, **kwargs):
+        """Init."""
+        super().__init__(*args, **kwargs)
+        self.client_commands.update({
+            0x0000: (
+                'status_change_notification',
+                (t.bitmap16, t.bitmap8),
+                False
+            ),
+        })
 
 
 class Z308E3ED(CustomDevice):
@@ -45,7 +61,7 @@ class Z308E3ED(CustomDevice):
                     PowerConfigurationCluster,
                     Identify.cluster_id,
                     PollControl.cluster_id,
-                    IasZone.cluster_id,
+                    IASZoneCluster,
                     Commissioning.cluster_id,
                     DIAGNOSTICS_CLUSTER_ID
                 ]
